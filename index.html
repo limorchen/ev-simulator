@@ -293,6 +293,126 @@
   .t-fail { background: var(--red-l);  color: #791F1F; }
   .t-unkn { background: var(--gray-l); color: var(--ink3); }
 
+  /* ─── nav tabs ─────────────────────────────────── */
+  .nav-tabs {
+    display: flex; gap: 0; background: var(--ink);
+    padding: 0 28px; border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-tab {
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .04em;
+    padding: 10px 18px; color: rgba(255,255,255,0.45); cursor: pointer;
+    border-bottom: 2px solid transparent; background: none; border-top: none;
+    border-left: none; border-right: none; transition: all .15s;
+  }
+  .nav-tab:hover { color: rgba(255,255,255,0.75); }
+  .nav-tab.active { color: #fff; border-bottom-color: var(--teal); }
+  .page { display: none; }
+  .page.active { display: block; }
+  #page-sim { display: grid; }
+  .app { display: grid; grid-template-columns: 270px 1fr; gap: 0; height: calc(100vh - 82px); overflow: hidden; }
+
+  /* ─── explanation page ──────────────────────────── */
+  .explain-page {
+    max-width: 860px; margin: 0 auto;
+    padding: 36px 28px 60px; overflow-y: auto;
+    height: calc(100vh - 82px);
+  }
+  .explain-page h1 {
+    font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500;
+    color: var(--ink); margin-bottom: 6px;
+  }
+  .explain-page .subtitle {
+    font-size: 13px; color: var(--ink3); margin-bottom: 36px;
+    padding-bottom: 20px; border-bottom: 0.5px solid var(--border2);
+  }
+  .explain-page h2 {
+    font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+    color: var(--teal-d); text-transform: uppercase; letter-spacing: .06em;
+    margin: 36px 0 14px;
+  }
+  .explain-page h2:first-of-type { margin-top: 0; }
+  .explain-page p { font-size: 13px; color: var(--ink2); line-height: 1.75; margin-bottom: 12px; }
+  .explain-page strong { color: var(--ink); font-weight: 500; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 24px; }
+  .stat-card {
+    background: var(--surface); border: 0.5px solid var(--border2);
+    border-radius: var(--radius); padding: 14px 16px;
+  }
+  .stat-card .sv {
+    font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500;
+    color: var(--ink); line-height: 1;
+  }
+  .stat-card .sl { font-size: 11px; color: var(--ink3); margin-top: 4px; }
+  .run-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 14px 0 24px; }
+  .run-table th {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .05em;
+    color: var(--ink3); text-align: left; padding: 6px 10px;
+    border-bottom: 1px solid var(--border2); background: var(--bg);
+  }
+  .run-table td { padding: 7px 10px; border-bottom: 0.5px solid var(--border); color: var(--ink2); }
+  .run-table tr:hover td { background: var(--bg); }
+  .run-table .best td { color: var(--teal-d); font-weight: 500; }
+  .run-table .low td { color: var(--ink3); }
+  .run-table .flag { font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+  .run-table .f-ok  { background: var(--teal-l);  color: var(--teal-d); }
+  .run-table .f-mid { background: var(--amber-l); color: #633806; }
+  .run-table .f-bad { background: var(--red-l);   color: #791F1F; }
+  .signal-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 0.5px solid var(--border);
+  }
+  .signal-row:last-child { border-bottom: none; }
+  .sig-name { min-width: 160px; font-size: 12px; font-weight: 500; color: var(--ink); }
+  .sig-rho {
+    font-family: 'DM Mono', monospace; font-size: 13px; min-width: 52px;
+    font-weight: 500;
+  }
+  .sig-bar-bg { flex: 1; height: 6px; background: var(--gray-l); border-radius: 3px; overflow: hidden; }
+  .sig-bar { height: 100%; border-radius: 3px; }
+  .sig-p { font-size: 11px; color: var(--ink3); min-width: 60px; text-align: right; }
+  .sig-interp { font-size: 11px; color: var(--ink3); min-width: 120px; text-align: right; }
+  .callout {
+    background: var(--teal-l); border-left: 3px solid var(--teal);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 12px 16px; margin: 16px 0; font-size: 12px;
+    color: var(--teal-d); line-height: 1.7;
+  }
+  .callout strong { color: var(--teal-d); }
+  .callout-warn {
+    background: var(--amber-l); border-left-color: var(--amber);
+    color: #633806;
+  }
+  .callout-warn strong { color: #412402; }
+  .purity-obs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 24px; }
+  .purity-obs-card {
+    background: var(--surface); border: 0.5px solid var(--border2);
+    border-radius: var(--radius); padding: 12px 14px;
+  }
+  .purity-obs-card .poc-title { font-size: 11px; color: var(--ink3); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
+  .purity-obs-card .poc-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--ink); }
+  .purity-obs-card .poc-sub { font-size: 11px; color: var(--ink3); margin-top: 3px; }
+  .model-block {
+    background: var(--bg); border: 0.5px solid var(--border2);
+    border-radius: var(--radius); padding: 14px 16px; margin: 14px 0;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--ink2); line-height: 2.0;
+  }
+  .model-block .comment { color: var(--ink3); }
+  .model-block .var { color: var(--teal-d); }
+  .model-block .val { color: #185FA5; }
+  .bo-phase {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 0; border-bottom: 0.5px solid var(--border);
+  }
+  .bo-phase:last-child { border-bottom: none; }
+  .bo-num {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500;
+  }
+  .bo-phase-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .bo-phase-body { font-size: 12px; color: var(--ink2); line-height: 1.65; }
+
   /* scrollbar */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -309,6 +429,12 @@
   <div class="header-badge">pre-GMP · research phase</div>
 </div>
 
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showPage('sim')">Simulator</button>
+  <button class="nav-tab" onclick="showPage('explain')">Data &amp; Model</button>
+</div>
+
+<div id="page-sim" class="page active">
 <div class="app">
 
 <!-- ─── SIDEBAR ─────────────────────────────────── -->
@@ -538,6 +664,201 @@
 
 </div><!-- /main -->
 </div><!-- /app -->
+</div><!-- /page-sim -->
+
+<div id="page-explain" class="page">
+<div class="explain-page">
+
+  <h1>Data &amp; Model Documentation</h1>
+  <p class="subtitle">How this simulator was built — the bioreactor runs, statistical signals, surrogate model, and Bayesian optimisation framework underlying the predictions.</p>
+
+  <h2>Dataset overview</h2>
+  <p>The simulator is grounded in data from <strong>9 successful bioreactor runs</strong> conducted at Nurexone using human bone marrow-derived MSCs expanded on FibraCel microcarriers in a 1.5–5.5L stirred tank bioreactor. Four additional runs were excluded due to equipment failure (headplate leaks: RD1031, RD1047), contamination (RD1037, RD1039), or protocol deviation (RD1042a). Each run was 8–17 days total, with minute-by-minute online sensor data (DO, pH, agitation, temperature, gas flows) and 20–30 offline measurements per run.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="sv">9</div><div class="sl">successful runs in training set</div></div>
+    <div class="stat-card"><div class="sv">53,781</div><div class="sl">online sensor timepoints (RD1033)</div></div>
+    <div class="stat-card"><div class="sv">4</div><div class="sl">runs with full secretion kinetics</div></div>
+    <div class="stat-card"><div class="sv">2.27–5.44</div><div class="sl">×10¹³ total EV yield range</div></div>
+    <div class="stat-card"><div class="sv">7,780–24,615</div><div class="sl">EVs/cell secretion efficiency range</div></div>
+    <div class="stat-card"><div class="sv">140–158 nm</div><div class="sl">EV mean diameter (NTA)</div></div>
+  </div>
+
+  <h2>Run summary</h2>
+  <table class="run-table">
+    <thead>
+      <tr><th>Run</th><th>Expand (d)</th><th>Collect (d)</th><th>Agit (rpm)</th><th>AB</th><th>Compact</th><th>Total EVs ×10¹³</th><th>EVs/cell</th><th>Size (nm)</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr class="best"><td>RD1041</td><td>5.1</td><td>5.0</td><td>225</td><td>—</td><td>—</td><td>5.44</td><td>22,762</td><td>149</td><td><span class="flag f-ok">best</span></td></tr>
+      <tr class="best"><td>RD1042b</td><td>4.9</td><td>5.0</td><td>225</td><td>—</td><td>—</td><td>5.36</td><td>19,706</td><td>148</td><td><span class="flag f-ok">replicates best</span></td></tr>
+      <tr><td>RD1053</td><td>4.2</td><td>4.4</td><td>200</td><td>—</td><td>—</td><td>4.20</td><td>17,355</td><td>140</td><td><span class="flag f-mid">process deviations</span></td></tr>
+      <tr><td>RD1049</td><td>5.8</td><td>4.0</td><td>300</td><td>✓</td><td>—</td><td>4.12</td><td>14,352</td><td>158</td><td><span class="flag f-ok">clean</span></td></tr>
+      <tr><td>RD1030</td><td>5.4</td><td>3.75</td><td>225</td><td>✓</td><td>—</td><td>4.00</td><td>24,615</td><td>118</td><td><span class="flag f-mid">perfusion / 30g</span></td></tr>
+      <tr><td>RD1040</td><td>5.7</td><td>3.0</td><td>225</td><td>✓</td><td>✓</td><td>3.04</td><td>17,572</td><td>150</td><td><span class="flag f-mid">DSP anomaly</span></td></tr>
+      <tr class="low"><td>RD1043</td><td>5.8</td><td>3.0</td><td>300</td><td>—</td><td>✓</td><td>2.60</td><td>10,924</td><td>153</td><td><span class="flag f-bad">compact FibraCel</span></td></tr>
+      <tr class="low"><td>RD1052</td><td>5.8</td><td>4.0</td><td>300</td><td>✓</td><td>—</td><td>2.53</td><td>7,780</td><td>146</td><td><span class="flag f-bad">seeding tube cut</span></td></tr>
+      <tr class="low"><td>RD1033</td><td>8.0</td><td>9.0</td><td>225</td><td>✓</td><td>—</td><td>2.27</td><td>17,462</td><td>152</td><td><span class="flag f-mid">old protocol</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Statistical signals</h2>
+  <p>Spearman rank correlations were computed between each process variable and log₁₀(total EVs) across the 6 standardised-protocol runs (RD1041, RD1042b, RD1049, RD1052, RD1043, RD1053). Only one predictor reaches statistical significance at α=0.05.</p>
+
+  <div style="margin: 14px 0 24px;">
+    <div class="signal-row">
+      <span class="sig-name">Collection days</span>
+      <span class="sig-rho" style="color:#0F6E56">ρ = +0.88</span>
+      <div class="sig-bar-bg"><div class="sig-bar" style="width:88%;background:#1D9E75"></div></div>
+      <span class="sig-p">p = 0.020</span>
+      <span class="sig-interp" style="color:#0F6E56">★★ significant</span>
+    </div>
+    <div class="signal-row">
+      <span class="sig-name">Agitation (rpm)</span>
+      <span class="sig-rho" style="color:#854F0B">ρ = −0.74</span>
+      <div class="sig-bar-bg"><div class="sig-bar" style="width:74%;background:#EF9F27"></div></div>
+      <span class="sig-p">p = 0.092</span>
+      <span class="sig-interp">★ trending</span>
+    </div>
+    <div class="signal-row">
+      <span class="sig-name">Expansion days</span>
+      <span class="sig-rho" style="color:#854F0B">ρ = −0.70</span>
+      <div class="sig-bar-bg"><div class="sig-bar" style="width:70%;background:#EF9F27"></div></div>
+      <span class="sig-p">p = 0.123</span>
+      <span class="sig-interp">★ trending</span>
+    </div>
+    <div class="signal-row">
+      <span class="sig-name">Antibiotics</span>
+      <span class="sig-rho" style="color:#888780">ρ = −0.62</span>
+      <div class="sig-bar-bg"><div class="sig-bar" style="width:62%;background:#B4B2A9"></div></div>
+      <span class="sig-p">p = 0.188</span>
+      <span class="sig-interp">— marginal</span>
+    </div>
+    <div class="signal-row">
+      <span class="sig-name">Cells/disc</span>
+      <span class="sig-rho" style="color:#888780">ρ = −0.34</span>
+      <div class="sig-bar-bg"><div class="sig-bar" style="width:34%;background:#D3D1C7"></div></div>
+      <span class="sig-p">p = 0.498</span>
+      <span class="sig-interp">— noise</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Important confound:</strong> Agitation and antibiotics are correlated in this dataset — all antibiotic runs also used 300 rpm agitation. Their individual effects cannot be cleanly separated until a run is designed to vary one while holding the other fixed. The simulator treats them as independent, which introduces uncertainty.
+  </div>
+
+  <h2>Secretion kinetics</h2>
+  <p>Four runs have time-resolved EV concentration data measured at 9–16h intervals throughout the collection phase. This reveals the shape of the secretion curve — critical for deciding when to harvest.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="sv">~110h</div><div class="sl">secretion peak (RD1041: 111h, RD1042b: 112h, RD1053: 103h)</div></div>
+    <div class="stat-card"><div class="sv">70h</div><div class="sl">RD1040 peak — likely truncated by early harvest</div></div>
+    <div class="stat-card"><div class="sv">~4.6 d</div><div class="sl">optimal collect duration implied by kinetics data</div></div>
+  </div>
+
+  <p>The kinetics shape is consistent across runs: a slow initial rise (0–24h), rapid accumulation (24–72h), a plateau approaching maximum (72–112h), then saturation. Runs harvested at 3d (72h) capture only ~70% of the secretion curve. This explains why collection days is the strongest predictor of yield — it is essentially a proxy for how much of the secretion curve is captured.</p>
+
+  <h2>Downstream purity data</h2>
+  <p>Protein and DNA residuals were measured at each purification step (crude conditioned medium → Agent V clarification → 5µm filtration → 0.45µm filtration → TFF permeate → TFF diafiltration → post-diafiltration final product). Data exists for RD1025/1, RD1030/A, and multiple RD1033 sub-batches.</p>
+
+  <div class="purity-obs">
+    <div class="purity-obs-card">
+      <div class="poc-title">PROTEIN — crude conditioned medium</div>
+      <div class="poc-val">4,155 – 12,410 µg/mL</div>
+      <div class="poc-sub">range across batches · RD1033/A2 outlier at 12,410 (3× others)</div>
+    </div>
+    <div class="purity-obs-card">
+      <div class="poc-title">PROTEIN — post-diafiltration</div>
+      <div class="poc-val">&lt;10 µg/mL</div>
+      <div class="poc-sub">99.1–99.7% depletion in all tracked batches · TL in best batches</div>
+    </div>
+    <div class="purity-obs-card">
+      <div class="poc-title">PARTICLE:PROTEIN — crude</div>
+      <div class="poc-val">4.5–8.1 ×10⁵ EVs/µg</div>
+      <div class="poc-sub">CV = 21% across 5 batches · RD1033/B1 highest at 8.1×10⁵</div>
+    </div>
+    <div class="purity-obs-card">
+      <div class="poc-title">PARTICLE:PROTEIN — post-DF</div>
+      <div class="poc-val">3.26 ×10⁶ EVs/µg</div>
+      <div class="poc-sub">best observed (RD1033/B5#2) · 6× enrichment over crude</div>
+    </div>
+    <div class="purity-obs-card">
+      <div class="poc-title">DNA — crude</div>
+      <div class="poc-val">~2 ×10¹⁰ EVs/µg DNA</div>
+      <div class="poc-sub">remarkably consistent across all runs — not process-variable</div>
+    </div>
+    <div class="purity-obs-card">
+      <div class="poc-title">DNA — post-diafiltration</div>
+      <div class="poc-val">Below detection</div>
+      <div class="poc-sub">TL in RD1033/B1, B5#1, RD1025/1 · 97–99%+ clearance confirmed</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Key purity finding:</strong> DNA contamination at crude is consistent regardless of upstream conditions (~2×10¹⁰ EVs/µg DNA across all runs). It is a fixed biological parameter of MSC-conditioned medium — not something upstream optimisation can improve. Protein at crude shows more variation (CV ~21%), and may correlate with secretion phase length and cell density. The TFF diafiltration step is the primary driver of protein removal — filtration steps alone (Agent V, 5µm, 0.45µm) have minimal effect on protein concentration.
+  </div>
+
+  <h2>Surrogate model</h2>
+  <p>The simulator uses a <strong>Gaussian Process (GP) surrogate model</strong> fitted to the 6 standardised-protocol runs (RD1030 and RD1033 were excluded as they used a different protocol regime with 30g FibraCel and perfusion). The GP was implemented using a Matérn 5/2 kernel with automatic relevance determination (ARD), fitted via maximum marginal likelihood with 15 random restarts.</p>
+
+  <div class="model-block">
+    <span class="comment"># Prediction model — key coefficients (simplified for display)</span><br>
+    <span class="var">EVs</span> = 4.6<br>
+    &nbsp;&nbsp;+ (5.0 − <span class="var">expand_days</span>) × <span class="val">0.23</span> &nbsp;&nbsp;<span class="comment"># shorter expansion → higher yield</span><br>
+    &nbsp;&nbsp;+ <span class="var">collect_contribution</span>(days) &nbsp;&nbsp;<span class="comment"># +0.40/d up to 5.5d, then +0.07/d</span><br>
+    &nbsp;&nbsp;+ agit_effect(<span class="var">rpm</span>) &nbsp;&nbsp;<span class="comment"># +0.58 at 225 vs 300 rpm</span><br>
+    &nbsp;&nbsp;− 0.58 × <span class="var">antibiotics</span><br>
+    &nbsp;&nbsp;− 0.65 × <span class="var">compact_fibracell</span>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Honest uncertainty statement:</strong> Leave-one-out cross-validation gives a prediction error of ±51% (0.18 log₁₀ units). With n=6 training points and correlated variables, the GP reliably identifies the <em>direction</em> of improvement but not exact yield values. Treat all predictions as directional guidance — not engineering specifications. The confidence score in the simulator reflects proximity to observed data, not absolute accuracy.
+  </div>
+
+  <h2>Bayesian optimisation framework</h2>
+  <p>The GP surrogate enables Bayesian Optimisation (BO) — a principled method for finding optimal process conditions when each experiment is expensive. Rather than grid-searching, BO uses the GP's uncertainty estimates to compute an <em>Expected Improvement</em> acquisition function that balances exploitation (try near the best known point) and exploration (try where uncertainty is high).</p>
+
+  <div style="margin: 14px 0 24px;">
+    <div class="bo-phase">
+      <div class="bo-num" style="background:#E1F5EE;color:#0F6E56">1</div>
+      <div>
+        <div class="bo-phase-title">Phase 1 — Replicate (next 1–2 runs)</div>
+        <div class="bo-phase-body">Run RD1041 conditions exactly: 5.0d expansion, 5.0d collection, 225 rpm, no antibiotics, loose FibraCel packing. If yield ≥5.0×10¹³ → signal is confirmed and biological, not a one-off. If not → donor variability is dominating and more replicates are needed before optimising further.</div>
+      </div>
+    </div>
+    <div class="bo-phase">
+      <div class="bo-num" style="background:#E6F1FB;color:#185FA5">2</div>
+      <div>
+        <div class="bo-phase-title">Phase 2 — Disentangle confounds (runs 3–5)</div>
+        <div class="bo-phase-body">Design one run varying agitation alone (e.g. 250 rpm with all else fixed at RD1041 conditions) and one run with antibiotics=YES at 225 rpm. This breaks the agitation–antibiotics confound and gives the GP real contrast to resolve each variable's effect independently.</div>
+      </div>
+    </div>
+    <div class="bo-phase">
+      <div class="bo-num" style="background:#EEEDFE;color:#3C3489">3</div>
+      <div>
+        <div class="bo-phase-title">Phase 3 — Explore beyond (runs 6–10)</div>
+        <div class="bo-phase-body">By run 8–10 the GP has enough contrast to recommend genuinely novel conditions — for example, testing 6d collection, or the collect/expansion interaction. This phase also generates the labeled dataset (run conditions → yield) needed to eventually scaffold an MPC or DRL-based within-run control system.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>How to update this simulator</h2>
+  <p>As new runs are completed, open the HTML file in GitHub's editor (press <strong>.</strong> in your repository) and update two sections in the JavaScript:</p>
+  <p><strong>1. Add new run to RUNS array</strong> — find the <code>var RUNS=[</code> block and add a new line with the run's parameters and measured yield.</p>
+  <p><strong>2. Adjust predict() coefficients</strong> — find the <code>function predict(</code> block and update the multiplier values to better fit the growing dataset. The comments in that function label each coefficient.</p>
+  <p><strong>3. Update REF object</strong> — if a new run becomes the best observed, update <code>var REF=</code> so all delta calculations compare against the new benchmark.</p>
+
+</div>
+</div><!-- /page-explain -->
+
+<script>
+function showPage(name){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('page-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
 
 <script>
 var AB=0,CP=0,PF=0;
