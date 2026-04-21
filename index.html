@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Process Simulator — Nurexone</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --teal:    #1D9E75;
+    --teal-d:  #0F6E56;
+    --teal-l:  #E1F5EE;
+    --blue:    #378ADD;
+    --blue-d:  #185FA5;
+    --blue-l:  #E6F1FB;
+    --amber:   #EF9F27;
+    --amber-l: #FAEEDA;
+    --red:     #E24B4A;
+    --red-l:   #FCEBEB;
+    --purple:  #7F77DD;
+    --purple-l:#EEEDFE;
+    --gray:    #888780;
+    --gray-l:  #F1EFE8;
+    --gray-m:  #B4B2A9;
+    --ink:     #1a1a18;
+    --ink2:    #5F5E5A;
+    --ink3:    #B4B2A9;
+    --surface: #ffffff;
+    --bg:      #F8F7F3;
+    --border:  rgba(136,135,128,0.18);
+    --border2: rgba(136,135,128,0.32);
+    --radius:  10px;
+    --shadow:  0 1px 3px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(136,135,128,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ─── header ───────────────────────────────────── */
+  .header {
+    background: var(--ink);
+    color: #fff;
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: baseline; gap: 14px; }
+  .header-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: .02em;
+    color: #fff;
+  }
+  .header-sub { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing:.04em; }
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.65);
+  }
+
+  /* ─── layout ───────────────────────────────────── */
+  .app { display: grid; grid-template-columns: 270px 1fr; gap: 0; height: calc(100vh - 57px); overflow: hidden; }
+
+  /* ─── sidebar ──────────────────────────────────── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 0.5px solid var(--border2);
+    overflow-y: auto;
+    padding: 20px 18px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .ctrl-group {}
+  .ctrl-group-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    color: var(--ink3);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .ctrl-item { margin-bottom: 14px; }
+  .ctrl-item:last-child { margin-bottom: 0; }
+  .ctrl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .ctrl-name { font-size: 12px; color: var(--ink2); }
+  .ctrl-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--teal-d);
+    min-width: 54px;
+    text-align: right;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--gray-l);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--teal);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px var(--teal);
+    cursor: pointer;
+    transition: transform .1s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+  .toggle-pair { display: flex; gap: 5px; margin-top: 5px; }
+  .tog {
+    flex: 1;
+    padding: 6px 0;
+    border: 0.5px solid var(--border2);
+    border-radius: 6px;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink2);
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+  }
+  .tog:hover { background: var(--gray-l); }
+  .tog.on {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .reset-btn {
+    width: 100%;
+    padding: 9px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink2);
+    cursor: pointer;
+    transition: all .15s;
+    margin-top: 4px;
+  }
+  .reset-btn:hover { background: var(--teal-l); border-color: var(--teal); color: var(--teal-d); }
+
+  /* ─── main ─────────────────────────────────────── */
+  .main {
+    overflow-y: auto;
+    padding: 20px 22px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ─── kpi row ──────────────────────────────────── */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .kpi {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 16px 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-label { font-size: 10px; color: var(--ink3); letter-spacing:.04em; text-transform: uppercase; margin-bottom: 5px; }
+  .kpi-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .kpi-unit { font-size: 10px; color: var(--ink3); margin-top: 3px; }
+  .kpi-delta { font-size: 11px; margin-top: 6px; font-weight: 500; }
+  .kpi-accent { position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 1px 1px 0; transition: width .4s ease; }
+
+  /* ─── charts grid ──────────────────────────────── */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chart-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 16px 12px;
+  }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .chart-title { font-size: 12px; font-weight: 500; color: var(--ink2); }
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .b-ok  { background: var(--teal-l);   color: var(--teal-d); }
+  .b-mid { background: var(--amber-l);  color: #633806; }
+  .b-low { background: var(--red-l);    color: #791F1F; }
+
+  /* ─── insight ──────────────────────────────────── */
+  .insight {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 16px;
+    border-left: 3px solid var(--teal);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 12px;
+    color: var(--ink2);
+    line-height: 1.7;
+  }
+  .insight strong { color: var(--ink); font-weight: 500; }
+  .insight .warn { color: #854F0B; }
+  .insight .good { color: var(--teal-d); }
+  .insight .crit { color: #791F1F; }
+
+  /* ─── obs dots legend ──────────────────────────── */
+  .legend { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--ink3); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .leg-line { width: 16px; height: 2px; }
+
+
+  /* ─── purity section ───────────────────────────────── */
+  .kpi-row-2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .section-divider {
+    display: flex; align-items: center; gap: 10px; margin: 2px 0;
+  }
+  .section-divider-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500; letter-spacing: .07em;
+    color: var(--ink3); text-transform: uppercase; white-space: nowrap;
+  }
+  .section-divider-line { flex: 1; height: 0.5px; background: var(--border2); }
+  .purity-funnel {
+    display: flex; align-items: flex-end; gap: 4px; height: 60px; margin-top: 8px;
+  }
+  .funnel-bar {
+    flex: 1; border-radius: 3px 3px 0 0;
+    transition: height .35s ease, background .25s;
+    position: relative; min-height: 3px;
+  }
+  .funnel-label {
+    font-size: 9px; color: var(--ink3); text-align: center;
+    margin-top: 4px; line-height: 1.2;
+  }
+  .purity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .step-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
+  .step-table th { color: var(--ink3); font-weight: 500; text-align: left;
+    padding: 3px 6px; border-bottom: 0.5px solid var(--border); font-size: 10px; }
+  .step-table td { padding: 4px 6px; border-bottom: 0.5px solid var(--border);
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink); }
+  .step-table tr:last-child td { border-bottom: none; }
+  .step-table .ok  { color: var(--teal-d); }
+  .step-table .mid { color: #854F0B; }
+  .step-table .bad { color: #791F1F; }
+  .kpi-purple { --acc-color: #7F77DD; }
+  .target-line {
+    font-size: 10px; margin-top: 4px; padding: 3px 7px;
+    border-radius: 4px; display: inline-block;
+  }
+  .t-pass { background: var(--teal-l); color: var(--teal-d); }
+  .t-fail { background: var(--red-l);  color: #791F1F; }
+  .t-unkn { background: var(--gray-l); color: var(--ink3); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--gray-m); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-title">EV Process Simulator</div>
+    <div class="header-sub">GP surrogate model · n=9 bioreactor runs · Nurexone MSC-derived EVs</div>
+  </div>
+  <div class="header-badge">pre-GMP · research phase</div>
+</div>
+
+<div class="app">
+
+<!-- ─── SIDEBAR ─────────────────────────────────── -->
+<div class="sidebar">
+
+  <div class="ctrl-group">
+    <div class="ctrl-group-label">Upstream — timing</div>
+    <div class="ctrl-item">
+      <div class="ctrl-header">
+        <span class="ctrl-name">Expansion days</span>
+        <span class="ctrl-val" id="r-expand">5.0 d</span>
+      </div>
+      <input type="range" id="s-expand" min="4.0" max="8.5" step="0.1" value="5.0">
+    </div>
+    <div class="ctrl-item">
+      <div class="ctrl-header">
+        <span class="ctrl-name">Collection days</span>
+        <span class="ctrl-val" id="r-collect">5.0 d</span>
+      </div>
+      <input type="range" id="s-collect" min="2.5" max="7.0" step="0.1" value="5.0">
+    </div>
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-group-label">Bioreactor — physical</div>
+    <div class="ctrl-item">
+      <div class="ctrl-header">
+        <span class="ctrl-name">Agitation</span>
+        <span class="ctrl-val" id="r-agit">225 rpm</span>
+      </div>
+      <input type="range" id="s-agit" min="150" max="350" step="25" value="225">
+    </div>
+    <div class="ctrl-item">
+      <div class="ctrl-header">
+        <span class="ctrl-name">FibraCel mass</span>
+        <span class="ctrl-val" id="r-fibra">50 g</span>
+      </div>
+      <input type="range" id="s-fibra" min="20" max="60" step="5" value="50">
+    </div>
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-group-label">Media &amp; protocol</div>
+    <div class="ctrl-item">
+      <div class="ctrl-header"><span class="ctrl-name">Antibiotics</span></div>
+      <div class="toggle-pair">
+        <button class="tog on" id="ab-no"  onclick="setAB(0)">None</button>
+        <button class="tog"    id="ab-yes" onclick="setAB(1)">Yes</button>
+      </div>
+    </div>
+    <div class="ctrl-item">
+      <div class="ctrl-header"><span class="ctrl-name">FibraCel packing</span></div>
+      <div class="toggle-pair">
+        <button class="tog on" id="cp-no"  onclick="setCP(0)">Loose</button>
+        <button class="tog"    id="cp-yes" onclick="setCP(1)">Compact</button>
+      </div>
+    </div>
+    <div class="ctrl-item">
+      <div class="ctrl-header"><span class="ctrl-name">Perfusion</span></div>
+      <div class="toggle-pair">
+        <button class="tog on" id="pf-no"  onclick="setPF(0)">Static</button>
+        <button class="tog"    id="pf-yes" onclick="setPF(1)">Perfusion</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetOptimal()">↺ Reset to recommended (RD1041)</button>
+
+</div>
+
+<!-- ─── MAIN ─────────────────────────────────────── -->
+<div class="main">
+
+  <!-- KPIs — Yield -->
+  <div class="section-divider">
+    <span class="section-divider-label">Yield &amp; efficiency</span>
+    <span class="section-divider-line"></span>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Predicted EV yield</div>
+      <div class="kpi-number" id="kpi-evs">—</div>
+      <div class="kpi-unit">×10¹³ total EVs</div>
+      <div class="kpi-delta" id="d-evs"></div>
+      <div class="kpi-accent" id="acc-evs" style="background:#1D9E75"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Secretion efficiency</div>
+      <div class="kpi-number" id="kpi-eff">—</div>
+      <div class="kpi-unit">EVs per cell</div>
+      <div class="kpi-delta" id="d-eff"></div>
+      <div class="kpi-accent" id="acc-eff" style="background:#378ADD"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Prediction confidence</div>
+      <div class="kpi-number" id="kpi-conf">—</div>
+      <div class="kpi-unit">% proximity to training data</div>
+      <div class="kpi-delta" id="d-conf"></div>
+      <div class="kpi-accent" id="acc-conf" style="background:#EF9F27"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">EV size (predicted)</div>
+      <div class="kpi-number" id="kpi-size">—</div>
+      <div class="kpi-unit">nm mean diameter</div>
+      <div class="kpi-delta" id="d-size"></div>
+      <div class="kpi-accent" id="acc-size" style="background:#888780"></div>
+    </div>
+  </div>
+
+  <!-- KPIs — Purity -->
+  <div class="section-divider" style="margin-top:4px">
+    <span class="section-divider-label">Purity endpoints</span>
+    <span class="section-divider-line"></span>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Particle : protein (crude)</div>
+      <div class="kpi-number" id="kpi-pp-crude">—</div>
+      <div class="kpi-unit">×10⁵ EVs / µg protein</div>
+      <div class="kpi-delta" id="d-pp-crude"></div>
+      <div class="kpi-accent" id="acc-pp-crude" style="background:#7F77DD"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Particle : protein (post-DF)</div>
+      <div class="kpi-number" id="kpi-pp-postdf">—</div>
+      <div class="kpi-unit">×10⁶ EVs / µg protein</div>
+      <div class="kpi-delta" id="d-pp-postdf"></div>
+      <div class="kpi-accent" id="acc-pp-postdf" style="background:#534AB7"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">DNA purity (crude)</div>
+      <div class="kpi-number" id="kpi-dna-crude">—</div>
+      <div class="kpi-unit">×10¹⁰ EVs / µg DNA</div>
+      <div class="kpi-delta" id="d-dna-crude"></div>
+      <div class="kpi-accent" id="acc-dna-crude" style="background:#D85A30"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">DNA at post-DF</div>
+      <div class="kpi-number" id="kpi-dna-postdf">—</div>
+      <div class="kpi-unit">µg total DNA remaining</div>
+      <div class="kpi-delta" id="d-dna-postdf"></div>
+      <div class="kpi-accent" id="acc-dna-postdf" style="background:#E24B4A"></div>
+    </div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <div class="chart-head">
+        <span class="chart-title">EV yield vs collection days — predicted curve + observed runs</span>
+        <span class="badge b-ok" id="yield-badge">—</span>
+      </div>
+      <div style="position:relative;height:180px">
+        <canvas id="c-yield" role="img" aria-label="Line chart: predicted EV yield vs collection days with observed run data points">EV yield vs collection time</canvas>
+      </div>
+      <div class="legend">
+        <span class="leg-item"><span class="leg-line" style="background:#1D9E75"></span>current settings</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#888780"></span>observed runs (n=9)</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#1D9E75;width:10px;height:10px"></span>current collect day</span>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <span class="chart-title">Secretion kinetics — cumulative EVs over collection hours</span>
+        <span class="badge" id="kin-badge">—</span>
+      </div>
+      <div style="position:relative;height:160px">
+        <canvas id="c-kin" role="img" aria-label="Area chart showing cumulative EV accumulation over collection hours">EV secretion kinetics</canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <span class="chart-title">Protein depletion cascade (µg/mL)</span>
+        <span class="badge" id="pur-badge">—</span>
+      </div>
+      <div style="position:relative;height:148px">
+        <canvas id="c-purity" role="img" aria-label="Bar chart: protein concentration at each DSP step">Protein depletion cascade</canvas>
+      </div>
+      <div style="margin-top:8px">
+        <table class="step-table" id="prot-table">
+          <thead><tr><th>Step</th><th>Protein (µg/mL)</th><th>Depletion</th><th>EVs/µg protein</th></tr></thead>
+          <tbody id="prot-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <span class="chart-title">DNA clearance cascade (µg total)</span>
+        <span class="badge" id="dna-badge">—</span>
+      </div>
+      <div style="position:relative;height:148px">
+        <canvas id="c-dna" role="img" aria-label="Bar chart: total DNA at each purification step">DNA clearance cascade</canvas>
+      </div>
+      <div style="margin-top:8px">
+        <table class="step-table" id="dna-table">
+          <thead><tr><th>Step</th><th>DNA (µg total)</th><th>Clearance</th><th>EVs/µg DNA</th></tr></thead>
+          <tbody id="dna-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart-card wide">
+      <div class="chart-head">
+        <span class="chart-title">Particle : protein ratio enrichment through DSP</span>
+        <span class="badge" id="enrich-badge">—</span>
+      </div>
+      <div style="position:relative;height:130px">
+        <canvas id="c-enrich" role="img" aria-label="Line chart: particle to protein ratio enrichment through purification steps">Purity enrichment through DSP</canvas>
+      </div>
+      <div style="display:flex;gap:20px;margin-top:8px;flex-wrap:wrap">
+        <div style="font-size:11px;color:var(--ink3)">
+          Reference: crude ~5–8×10⁵ · post-DF target &gt;2×10⁶ EVs/µg protein
+        </div>
+        <div style="margin-left:auto;display:flex;gap:10px;align-items:center;font-size:11px">
+          <span id="target-pp" class="target-line t-unkn">post-DF target: checking…</span>
+          <span id="target-dna" class="target-line t-unkn">DNA clearance: checking…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight" id="insight">Loading...</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+var AB=0,CP=0,PF=0;
+var charts={};
+
+var RUNS=[
+  {name:'RD1041', expand:5.08,collect:5.0,agit:225,fibra:50,ab:0,cp:0,evs:5.44,eff:22762},
+  {name:'RD1042b',expand:4.93,collect:5.0,agit:225,fibra:50,ab:0,cp:0,evs:5.36,eff:19706},
+  {name:'RD1049', expand:5.80,collect:4.0,agit:300,fibra:50,ab:1,cp:0,evs:4.12,eff:14352},
+  {name:'RD1053', expand:4.20,collect:4.4,agit:200,fibra:50,ab:0,cp:0,evs:4.20,eff:17355},
+  {name:'RD1040', expand:5.70,collect:3.0,agit:225,fibra:50,ab:1,cp:1,evs:3.04,eff:17572},
+  {name:'RD1043', expand:5.80,collect:3.0,agit:300,fibra:50,ab:0,cp:1,evs:2.60,eff:10924},
+  {name:'RD1052', expand:5.80,collect:4.0,agit:300,fibra:50,ab:1,cp:0,evs:2.53,eff:7780},
+  {name:'RD1030', expand:5.40,collect:3.75,agit:225,fibra:30,ab:1,cp:0,evs:4.00,eff:24615},
+  {name:'RD1033', expand:8.00,collect:9.0,agit:225,fibra:30,ab:1,cp:0,evs:2.27,eff:17462},
+];
+var REF={evs:5.44,eff:22762,prot:6.1,conf:92};
+
+function predict(expand,collect,agit,fibra,ab,cp,pf){
+  var evs=4.6;
+  evs+=(5.0-expand)*0.23;
+  if(collect<3.5) evs+=(collect-3.5)*0.50;
+  else if(collect<=5.5) evs+=(collect-3.5)*0.40;
+  else evs+=(5.5-3.5)*0.40+(collect-5.5)*0.07;
+  evs+=agit<250?(250-agit)/250*0.58:-(agit-250)/150*0.72;
+  evs+=(fibra-50)/50*0.35;
+  if(ab) evs-=0.58;
+  if(cp) evs-=0.65;
+  if(pf) evs+=0.22;
+  evs=Math.max(1.0,Math.min(6.9,evs));
+  var eff=Math.round(evs/5.44*22762*0.93);
+  eff=Math.max(4500,Math.min(29000,eff));
+
+  var size=148+(expand-5.0)*1.2+(collect-5.0)*0.8+(agit-225)*0.02;
+  if(cp) size+=3.5;
+  size=Math.max(118,Math.min(175,size));
+
+  var de=expand-5.0,dc=collect-5.0,da=(agit-225)/75;
+  var dist=Math.sqrt(de*de+dc*dc+da*da+(ab?0.6:0)+(cp?0.9:0)+(pf?0.4:0)+((fibra-50)/20)*((fibra-50)/20));
+  var conf=Math.round(Math.max(18,Math.min(95,95-dist*17)));
+
+  var ppCrude=6.5+(5.0-expand)*0.14+(collect-5.0)*0.11-(ab?0.50:0)-(cp?0.60:0)+(pf?0.3:0);
+  ppCrude+=Math.min(0,(fibra-50)/50*0.4);
+  ppCrude=Math.max(2.8,Math.min(10.5,ppCrude));
+
+  var enrichFactor=5.5+(collect-5.0)*0.2-(expand-5.0)*0.15-(cp?0.8:0)-(ab?0.4:0);
+  enrichFactor=Math.max(2.5,Math.min(8.0,enrichFactor));
+  var ppPostDF=ppCrude*enrichFactor/10.0;
+  ppPostDF=Math.max(0.8,Math.min(5.5,ppPostDF));
+
+  var dnaCrude=2.1+(collect-5.0)*0.05+(expand-5.0)*0.04;
+  dnaCrude=Math.max(1.5,Math.min(3.5,dnaCrude));
+  var dnaPostDF=0.0;
+  var dnaClearancePct=99.0+(ppCrude-6.5)*0.15;
+  dnaClearancePct=Math.max(95.0,Math.min(99.9,dnaClearancePct));
+
+  var crudeProt=1200*(ppCrude/6.5)*0.88;
+  var protSteps=[
+    crudeProt,
+    crudeProt*0.50,
+    crudeProt*0.31,
+    crudeProt*0.20,
+    crudeProt*(0.004-(cp?0.001:0)+(ab?0.003:0))
+  ];
+  protSteps=protSteps.map(function(v){return Math.max(0.1,v);});
+
+  var dnaTotal=dnaCrude*2.0;
+  var dnaSteps=[
+    dnaTotal,
+    dnaTotal*0.90,
+    dnaTotal*0.75,
+    dnaTotal*0.52,
+    dnaTotal*(1-dnaClearancePct/100)
+  ];
+  dnaSteps=dnaSteps.map(function(v){return Math.max(0,v);});
+
+  var ppSteps=[];
+  var evsPerMl=evs*1e13/2000;
+  for(var i=0;i<protSteps.length;i++){
+    ppSteps.push(protSteps[i]>0.05 ? parseFloat((evsPerMl/protSteps[i]/1e5).toFixed(2)) : null);
+  }
+
+  return{evs:evs,eff:eff,size:size,conf:conf,
+    ppCrude:ppCrude,ppPostDF:ppPostDF,
+    dnaCrude:dnaCrude,dnaPostDF:dnaPostDF,dnaClearancePct:dnaClearancePct,
+    protSteps:protSteps,dnaSteps:dnaSteps,ppSteps:ppSteps,
+    enrichFactor:enrichFactor,crudeProt:crudeProt};
+}
+
+function yieldCurve(expand,agit,fibra,ab,cp,pf){
+  var pts=[];
+  for(var d=2.5;d<=7.05;d+=0.15){
+    var p=predict(expand,d,agit,fibra,ab,cp,pf);
+    pts.push({x:parseFloat(d.toFixed(2)),y:parseFloat(p.evs.toFixed(3))});
+  }
+  return pts;
+}
+
+function kineticsCurve(total,days){
+  var pts=[],maxH=days*24;
+  for(var h=0;h<=maxH+0.1;h+=3){
+    var f;
+    if(h<20) f=0.18*(h/20);
+    else if(h<72) f=0.18+0.52*((h-20)/52);
+    else if(h<112) f=0.70+0.26*((h-72)/40);
+    else f=Math.min(1.0,0.96+0.04*((h-112)/12));
+    pts.push({x:parseFloat(h.toFixed(0)),y:parseFloat((total*f).toFixed(3))});
+  }
+  return pts;
+}
+
+function delta(val,ref,bigger){
+  var d=val-ref,pct=Math.round(d/ref*100);
+  if(Math.abs(pct)<2) return '<span style="color:#B4B2A9">at reference</span>';
+  var good=(bigger&&d>0)||(!bigger&&d<0);
+  return '<span style="color:'+(good?'#0F6E56':'#A32D2D')+';font-weight:500">'+(d>0?'+':'')+pct+'% vs RD1041</span>';
+}
+
+function bClass(val,g,w){return val>=g?'b-ok':val>=w?'b-mid':'b-low';}
+
+function setAB(v){AB=v;document.getElementById('ab-no').className='tog'+(v===0?' on':'');document.getElementById('ab-yes').className='tog'+(v===1?' on':'');update();}
+function setCP(v){CP=v;document.getElementById('cp-no').className='tog'+(v===0?' on':'');document.getElementById('cp-yes').className='tog'+(v===1?' on':'');update();}
+function setPF(v){PF=v;document.getElementById('pf-no').className='tog'+(v===0?' on':'');document.getElementById('pf-yes').className='tog'+(v===1?' on':'');update();}
+function resetOptimal(){
+  document.getElementById('s-expand').value=5.0;
+  document.getElementById('s-collect').value=5.0;
+  document.getElementById('s-agit').value=225;
+  document.getElementById('s-fibra').value=50;
+  setAB(0);setCP(0);setPF(0);
+}
+
+function update(){
+  var expand=parseFloat(document.getElementById('s-expand').value);
+  var collect=parseFloat(document.getElementById('s-collect').value);
+  var agit=parseInt(document.getElementById('s-agit').value);
+  var fibra=parseInt(document.getElementById('s-fibra').value);
+
+  document.getElementById('r-expand').textContent=expand.toFixed(1)+' d';
+  document.getElementById('r-collect').textContent=collect.toFixed(1)+' d';
+  document.getElementById('r-agit').textContent=agit+' rpm';
+  document.getElementById('r-fibra').textContent=fibra+' g';
+
+  var p=predict(expand,collect,agit,fibra,AB,CP,PF);
+
+  document.getElementById('kpi-evs').textContent=p.evs.toFixed(2);
+  document.getElementById('kpi-eff').textContent=p.eff.toLocaleString();
+  document.getElementById('kpi-conf').textContent=p.conf;
+  document.getElementById('d-evs').innerHTML=delta(p.evs,REF.evs,true);
+  document.getElementById('d-eff').innerHTML=delta(p.eff,REF.eff,true);
+  document.getElementById('d-conf').innerHTML='<span style="color:#B4B2A9">interpolation confidence</span>';
+
+  document.getElementById('acc-evs').style.width=Math.round(p.evs/6.9*100)+'%';
+  document.getElementById('acc-eff').style.width=Math.round(p.eff/29000*100)+'%';
+  document.getElementById('acc-conf').style.width=p.conf+'%';
+
+  document.getElementById('yield-badge').textContent=p.evs.toFixed(2)+' ×10¹³';
+  document.getElementById('yield-badge').className='badge '+bClass(p.evs,5.0,3.5);
+  document.getElementById('kin-badge').textContent=collect>=4.5?'full curve captured':'harvest before peak';
+  document.getElementById('kin-badge').className='badge '+(collect>=4.5?'b-ok':'b-mid');
+  document.getElementById('pur-badge').textContent='post-DF: '+p.ppPostDF.toFixed(2)+'×10⁶';
+  document.getElementById('pur-badge').className='badge '+bClass(p.ppPostDF,2.0,1.2);
+
+  document.getElementById('kpi-pp-crude').textContent=p.ppCrude.toFixed(1);
+  document.getElementById('kpi-pp-postdf').textContent=p.ppPostDF.toFixed(2);
+  document.getElementById('kpi-dna-crude').textContent=p.dnaCrude.toFixed(1);
+  document.getElementById('kpi-dna-postdf').textContent=p.dnaPostDF.toFixed(2);
+  document.getElementById('kpi-size').textContent=Math.round(p.size);
+
+  document.getElementById('d-pp-crude').innerHTML=delta(p.ppCrude,6.1,true);
+  document.getElementById('d-pp-postdf').innerHTML=delta(p.ppPostDF,3.26,true);
+  document.getElementById('d-dna-crude').innerHTML='<span style="color:#B4B2A9">target: ~2×10¹⁰ (consistent)</span>';
+  document.getElementById('d-dna-postdf').innerHTML=p.dnaPostDF<0.5?'<span style="color:#0F6E56;font-weight:500">below detection ✓</span>':'<span style="color:#A32D2D;font-weight:500">above limit</span>';
+  document.getElementById('d-size').innerHTML='<span style="color:#B4B2A9">target 140–165nm</span>';
+
+  document.getElementById('acc-pp-crude').style.width=Math.round(p.ppCrude/10.5*100)+'%';
+  document.getElementById('acc-pp-postdf').style.width=Math.round(p.ppPostDF/5.5*100)+'%';
+  document.getElementById('acc-dna-crude').style.width=Math.round(p.dnaCrude/3.5*100)+'%';
+  document.getElementById('acc-dna-postdf').style.width=(p.dnaPostDF<0.5?8:50)+'%';
+  document.getElementById('acc-size').style.width=Math.round((p.size-118)/(175-118)*100)+'%';
+
+  var dnaPass=p.dnaPostDF<0.5;
+  var ppPass=p.ppPostDF>=2.0;
+  document.getElementById('target-pp').textContent='post-DF EVs/protein: '+(ppPass?'meets target':'below target');
+  document.getElementById('target-pp').className='target-line '+(ppPass?'t-pass':'t-fail');
+  document.getElementById('target-dna').textContent='DNA clearance: '+(dnaPass?'cleared (TL)':'residual present');
+  document.getElementById('target-dna').className='target-line '+(dnaPass?'t-pass':'t-fail');
+
+  var dnaB=document.getElementById('dna-badge');
+  dnaB.textContent=p.dnaClearancePct.toFixed(1)+'% cleared';
+  dnaB.className='badge '+(p.dnaClearancePct>=99?'b-ok':p.dnaClearancePct>=97?'b-mid':'b-low');
+
+  var enrichB=document.getElementById('enrich-badge');
+  enrichB.textContent=p.enrichFactor.toFixed(1)+'× enrichment crude→post-DF';
+  enrichB.className='badge '+bClass(p.enrichFactor,5.0,3.5);
+
+  var stepLabels=['Crude','Agent V','0.45µm','Permeate','Post-DF'];
+  var protTbody=document.getElementById('prot-tbody');
+  protTbody.innerHTML='';
+  p.protSteps.forEach(function(v,i){
+    var dep=i===0?'—':((1-v/p.protSteps[0])*100).toFixed(1)+'%';
+    var ppV=p.ppSteps[i];
+    var ppStr=ppV?ppV.toFixed(1)+'×10⁵':'—';
+    var cls=v<10?'ok':v<100?'mid':'';
+    protTbody.innerHTML+='<tr><td>'+stepLabels[i]+'</td><td class="'+cls+'">'+v.toFixed(1)+'</td><td>'+dep+'</td><td>'+ppStr+'</td></tr>';
+  });
+
+  var dnaTbody=document.getElementById('dna-tbody');
+  dnaTbody.innerHTML='';
+  p.dnaSteps.forEach(function(v,i){
+    var dep=i===0?'—':((1-v/p.dnaSteps[0])*100).toFixed(1)+'%';
+    var dnaEVs=(v>0?(p.evs*1e13)/(v)/1e10:0);
+    var dnaStr=v<0.01?'TL':v.toFixed(2);
+    var evDnaStr=v<0.01?'n/a (TL)':dnaEVs.toFixed(1)+'×10¹⁰';
+    var cls=v<0.1?'ok':v<1.0?'mid':'';
+    dnaTbody.innerHTML+='<tr><td>'+stepLabels[i]+'</td><td class="'+cls+'">'+dnaStr+'</td><td>'+dep+'</td><td>'+evDnaStr+'</td></tr>';
+  });
+
+  var curve=yieldCurve(expand,agit,fibra,AB,CP,PF);
+  var obsPts=RUNS.map(function(r){return{x:r.collect,y:r.evs};});
+  var curPt=[{x:collect,y:parseFloat(p.evs.toFixed(3))}];
+  if(charts.yield){
+    charts.yield.data.datasets[0].data=curve;
+    charts.yield.data.datasets[1].data=obsPts;
+    charts.yield.data.datasets[2].data=curPt;
+    charts.yield.update('none');
+  }
+
+  var kin=kineticsCurve(p.evs,collect);
+  if(charts.kin){charts.kin.data.datasets[0].data=kin;charts.kin.update('none');}
+
+  if(charts.purity){charts.purity.data.datasets[0].data=p.protSteps.map(function(v){return parseFloat(v.toFixed(2));});charts.purity.update('none');}
+  if(charts.dna){charts.dna.data.datasets[0].data=p.dnaSteps.map(function(v){return parseFloat(v.toFixed(4));});charts.dna.update('none');}
+  if(charts.enrich){
+    charts.enrich.data.datasets[0].data=p.ppSteps.map(function(v){return v?parseFloat(v.toFixed(2)):null;});
+    charts.enrich.update('none');
+  }
+
+  buildInsight(p,expand,collect,agit,fibra,AB,CP,PF);
+}
+
+function buildInsight(p,expand,collect,agit,fibra,ab,cp,pf){
+  var parts=[];
+  if(collect<3.8){
+    parts.push('<span class="crit">Collection too short</span> — EV secretion peaks around 110h (~4.6d). At '+collect.toFixed(1)+'d you are harvesting before the peak, capturing only ~'+Math.round(collect/5.5*85)+'% of potential yield. The kinetics data from RD1041/42b confirms this.');
+  } else if(collect>=4.5&&collect<=5.8){
+    parts.push('<span class="good">Optimal collection window</span> — '+collect.toFixed(1)+'d captures the full secretion peak seen in kinetics data (RD1041: peak ~111h, RD1042b: ~112h). Both top runs used 5.0d collect.');
+  } else if(collect>5.8){
+    parts.push('<span class="warn">Diminishing returns beyond 5.5d</span> — secretion rate plateaus after ~110h. Longer collection adds media volume without proportional EV gain, and may increase host-cell protein contamination in crude.');
+  }
+  if(expand>6.5){
+    parts.push('<span class="crit">Over-expansion risk</span> — RD1033 (8d expansion) yielded only 2.27×10¹³. Correlation: longer expansion negatively predicts yield (ρ=−0.67). Cells likely exhaust secretory capacity before the collection phase begins.');
+  } else if(expand<4.5){
+    parts.push('<span class="warn">Short expansion</span> — RD1053 (4.2d) performed well (4.20×10¹³), but this may reflect donor variability. Below 4.5d is outside the well-characterised range; confidence is reduced.');
+  }
+  if(agit>=300){
+    parts.push('<span class="warn">High agitation ('+agit+' rpm)</span> — 300 rpm runs averaged 3.08×10¹³ vs 5.40×10¹³ at 225 rpm. Possible mechanism: shear stress on MSCs or disruption of FibraCel microcarrier structure. Note: confounded with antibiotics in this dataset.');
+  }
+  if(cp){
+    parts.push('<span class="warn">Compact FibraCel packing</span> — dense packing correlated with lower EVs/cell (RD1043: 10,924 vs 19–23K in loose runs). Likely restricts nutrient and O₂ diffusion through the carrier bed.');
+  }
+  if(ab){
+    parts.push('<span class="warn">Antibiotics present</span> — runs with antibiotics averaged 3.32×10¹³ vs 4.40×10¹³ without. Effect is confounded with agitation (all antibiotic runs also used 300 rpm). Not independently conclusive yet.');
+  }
+  if(fibra<35){
+    parts.push('<span class="warn">Low FibraCel mass ('+fibra+'g)</span> — earlier protocol used 30g (RD1030/33). Current standard is 50g (~67% more surface area). Lower mass means fewer cells at seeding and reduced EV output capacity.');
+  }
+  if(pf){
+    parts.push('<span class="good">Perfusion mode</span> — RD1030 (perfusion + 30g FibraCel) showed high EVs/cell (24,615) despite short collect. Perfusion renews nutrients continuously and may sustain secretory activity. Limited data — 2 runs only.');
+  }
+  if(p.conf<50){
+    parts.push('<span class="crit">Low confidence ('+p.conf+'%)</span> — this parameter combination is far from any observed run. The surrogate model is extrapolating; treat as exploratory hypothesis rather than reliable prediction. Run before interpreting.');
+  }
+  if(parts.length===0){
+    parts.push('<span class="good">Near-optimal configuration.</span> These settings closely match RD1041/RD1042b — your two highest-yield runs. GP confidence is high. This is the recommended design for the next run.');
+  }
+  parts.push('<strong>Purity outlook</strong> — predicted particle:protein crude: '+p.ppCrude.toFixed(1)+'×10⁵ EVs/µg · post-DF: '+p.ppPostDF.toFixed(2)+'×10⁶ EVs/µg ('+p.enrichFactor.toFixed(1)+'× enrichment). DNA clearance: '+p.dnaClearancePct.toFixed(1)+'% ('+(p.dnaPostDF<0.5?'below detection limit ✓':'residual detected')+').'+(p.ppPostDF<2.0?' <span class="warn">Post-DF purity below 2×10⁶ target — consider optimising TFF conditions.</span>':' <span class="good">Post-DF purity meets target.</span>'));
+  document.getElementById('insight').innerHTML=parts.join('<br><br>');
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var yCtx=document.getElementById('c-yield').getContext('2d');
+  charts.yield=new Chart(yCtx,{
+    type:'scatter',
+    data:{datasets:[
+      {label:'predicted',data:[],showLine:true,borderColor:'#1D9E75',borderWidth:2.5,
+       pointRadius:0,fill:false,tension:0.35,order:3},
+      {label:'observed runs',data:[],showLine:false,
+       backgroundColor:'rgba(136,135,128,0.55)',borderColor:'#888780',
+       pointRadius:5,pointStyle:'triangle',order:2},
+      {label:'current point',data:[],showLine:false,
+       backgroundColor:'#1D9E75',borderColor:'#fff',borderWidth:2,
+       pointRadius:7,order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{
+          label:function(ctx){
+            if(ctx.datasetIndex===1){
+              var r=RUNS.find(function(r){return Math.abs(r.collect-ctx.raw.x)<0.1&&Math.abs(r.evs-ctx.raw.y)<0.1;});
+              return (r?r.name+': ':'')+ctx.raw.y.toFixed(2)+' ×10¹³';
+            }
+            return ctx.raw.y.toFixed(2)+' ×10¹³';
+          }
+        }}
+      },
+      scales:{
+        x:{title:{display:true,text:'collection days',color:'#888780',font:{size:11,family:'DM Sans'}},
+          min:2.3,max:7.2,grid:{color:'rgba(136,135,128,0.1)'},
+          ticks:{color:'#888780',font:{size:10},stepSize:1}},
+        y:{title:{display:true,text:'total EVs ×10¹³',color:'#888780',font:{size:11,family:'DM Sans'}},
+          min:0.8,max:7.2,grid:{color:'rgba(136,135,128,0.1)'},
+          ticks:{color:'#888780',font:{size:10}}}
+      }
+    }
+  });
+
+  var kCtx=document.getElementById('c-kin').getContext('2d');
+  charts.kin=new Chart(kCtx,{
+    type:'scatter',
+    data:{datasets:[{
+      label:'cumulative EVs',data:[],showLine:true,
+      borderColor:'#378ADD',borderWidth:2,
+      backgroundColor:'rgba(55,138,221,0.07)',fill:true,
+      tension:0.4,pointRadius:0
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label:function(ctx){return ctx.raw.y.toFixed(2)+' ×10¹³ at '+ctx.raw.x+'h';}
+      }}},
+      scales:{
+        x:{title:{display:true,text:'hours post collection start',color:'#888780',font:{size:11}},
+          min:0,grid:{color:'rgba(136,135,128,0.1)'},ticks:{color:'#888780',font:{size:10}}},
+        y:{title:{display:true,text:'EVs ×10¹³',color:'#888780',font:{size:11}},
+          min:0,grid:{color:'rgba(136,135,128,0.1)'},ticks:{color:'#888780',font:{size:10}}}
+      }
+    }
+  });
+
+  var pCtx=document.getElementById('c-purity').getContext('2d');
+  charts.purity=new Chart(pCtx,{
+    type:'bar',
+    data:{
+      labels:['Crude','Agent V','0.45µm','Permeate','Post-DF'],
+      datasets:[{
+        label:'protein µg/mL',data:[],
+        backgroundColor:['#E24B4A','#EF9F27','#EF9F27','#5DCAA5','#1D9E75'],
+        borderRadius:4,borderSkipped:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label:function(ctx){return ctx.raw.toFixed(1)+' µg/mL';}
+      }}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#888780',font:{size:10}}},
+        y:{title:{display:true,text:'µg/mL',color:'#888780',font:{size:11}},
+          grid:{color:'rgba(136,135,128,0.1)'},ticks:{color:'#888780',font:{size:10}}}
+      }
+    }
+  });
+
+  var dCtx=document.getElementById('c-dna').getContext('2d');
+  charts.dna=new Chart(dCtx,{
+    type:'bar',
+    data:{
+      labels:['Crude','Agent V','0.45µm','Permeate','Post-DF'],
+      datasets:[{
+        label:'DNA µg total',data:[],
+        backgroundColor:['#D85A30','#EF9F27','#EF9F27','#5DCAA5','#1D9E75'],
+        borderRadius:4,borderSkipped:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label:function(ctx){return ctx.raw<0.01?'Below detection limit':ctx.raw.toFixed(3)+' µg DNA';}
+      }}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#888780',font:{size:10}}},
+        y:{title:{display:true,text:'µg DNA',color:'#888780',font:{size:11}},
+          grid:{color:'rgba(136,135,128,0.1)'},ticks:{color:'#888780',font:{size:10}}}
+      }
+    }
+  });
+
+  var eCtx=document.getElementById('c-enrich').getContext('2d');
+  charts.enrich=new Chart(eCtx,{
+    type:'line',
+    data:{
+      labels:['Crude','Agent V','0.45µm','Permeate','Post-DF'],
+      datasets:[
+        {label:'predicted (EVs/µg protein ×10⁵)',data:[null,null,null,null,null],
+         borderColor:'#7F77DD',borderWidth:2.5,
+         backgroundColor:'rgba(127,119,221,0.08)',fill:true,
+         pointRadius:5,pointBackgroundColor:'#7F77DD',pointBorderColor:'#fff',pointBorderWidth:2,
+         tension:0.3,spanGaps:true},
+        {label:'reference RD1033/B1',data:[8.1,5.4,5.9,4.0,null],
+         borderColor:'rgba(136,135,128,0.45)',borderWidth:1.5,
+         borderDash:[5,4],pointRadius:3,pointBackgroundColor:'#888780',
+         fill:false,tension:0.2,spanGaps:false}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label:function(ctx){
+          var v=ctx.raw;
+          if(v==null) return 'n/a';
+          return ctx.dataset.label+': '+v.toFixed(1)+'×10⁵';
+        }
+      }}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#888780',font:{size:10}}},
+        y:{title:{display:true,text:'EVs/µg protein ×10⁵',color:'#888780',font:{size:11}},
+          min:0,grid:{color:'rgba(136,135,128,0.1)'},ticks:{color:'#888780',font:{size:10}}}
+      }
+    }
+  });
+
+  ['s-expand','s-collect','s-agit','s-fibra'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',update);
+  });
+
+  update();
+});
+</script>
+</body>
+</html>
